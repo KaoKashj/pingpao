@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Extract text pages from the AI major 培养方案 PDF into a txt file."""
-from config import path, pdf_path
+"""把一份培养方案 PDF 的文本抽出来（调试用）。
+
+产物写在临时目录，不进仓库——真正要用的课程清单在 kb.json 里，
+由 build_kb.py 从全部培养方案的 PDF 解析而来。"""
+from config import tmp, pdf_path
 import sys
 
 PDF = pdf_path()
-OUT = path("培养方案_人工智能_2026.txt")
+OUT = tmp("plan_extract.txt")   # 临时产物，不进仓库
 
 import pdfplumber
 

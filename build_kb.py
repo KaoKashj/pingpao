@@ -11,7 +11,7 @@ build_kb.py — 从《浙江大学2026级培养方案》PDF 目录构建专业�
 {
   "generated": "...",
   "majors": [
-     {"name": "人工智能", "college": "计算机科学与技术学院", "file": "...",
+     {"name": "<专业名>", "college": "<学院>", "file": "...",
       "courses": [{"code","name","credits","category","section"}],
       "sections": {"一、通识课程 > 1.通识必修课程 > (1)思政类": 5, ...}}
   ]
@@ -204,9 +204,10 @@ def main():
     print(f"专业 {len(majors)} 个 | 课程条目 {total} 条 | 大小 {os.path.getsize(OUT)/1024:.0f} KB")
 
     # 抽样校验
-    print("\n=== 抽样：人工智能 ===")
+    print("\n=== 抽样：随便挑一个专业看结构 ===")
     for m in majors:
-        if m["name"] == "人工智能":
+        if m["courses"]:
+            print("  专业:", m["name"])
             for c in m["courses"][:8]:
                 print(f"  {c[0]:<12} {c[1]:<28} {c[3]}")
             print("  分类统计:", json.dumps(m["sections"], ensure_ascii=False))

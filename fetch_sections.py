@@ -30,7 +30,7 @@ for c in pool:
         "src": "zdbk通识/体育目录",
     }
 # 2) 培养方案知识库：131 个专业的带课号课程（kb.json，由 build_kb.py 生成）
-#    原来这里只读"人工智能"一个专业的课程清单，现在改成全部专业。
+#    原来这里只读某一个专业的课程清单（写死的），现在改成 kb.json 里的全部专业。
 kb = json.load(open(path("kb.json"), encoding="utf-8"))
 plan_codes = 0
 for major in kb["majors"]:

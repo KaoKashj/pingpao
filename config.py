@@ -58,9 +58,11 @@ JWGLXT_MODULE = os.path.abspath(os.path.expanduser(
 
 # ---- 培养方案 PDF --------------------------------------------------------
 
-#: 默认路径。**换机器基本都要改**，所以优先用 COURSEFIT_PDF 覆盖。
-PDF_PATH_DEFAULT = os.path.expanduser(
-    "~/Desktop/浙江大学/浙江大学2026级培养方案PDF/计算机科学与技术学院/2026级人工智能专业培养方案.pdf")
+#: 单份培养方案 PDF 的路径。
+#: 只有 extract_pdf.py / extract_courses_final.py 需要它，用来调试某一份方案；
+#: 完整的课程清单来自 kb.json（131 个专业），不需要这个变量。
+#: **默认留空**——它是个可选入口，不绑定任何专业。
+PDF_PATH_DEFAULT = ""
 
 #: 实际使用的 PDF 路径（COURSEFIT_PDF 优先）
 PDF_PATH = os.path.expanduser(os.environ.get("COURSEFIT_PDF", PDF_PATH_DEFAULT))
@@ -76,7 +78,7 @@ KB_JSON = os.path.join(PROJECT_DIR, "kb.json")
 
 # ---- 本项目内部的产物路径 -------------------------------------------------
 
-PLAN_TSV = os.path.join(PROJECT_DIR, "培养方案课程清单.tsv")
+PLAN_TSV = os.path.join(PROJECT_DIR, "plan_courses.tsv")
 CATALOG_JSON = os.path.join(TMP_DIR, "jwglxt_catalog.json")
 
 

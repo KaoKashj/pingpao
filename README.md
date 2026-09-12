@@ -31,7 +31,7 @@
 
 | 文件 | 输入 → 输出 |
 |---|---|
-| `extract_pdf.py` | 培养方案 PDF → 原始文本（`培养方案_人工智能_2026.txt`） |
+| `extract_pdf.py` | 把一份培养方案 PDF 抽成文本（调试用，产物写临时目录） |
 | `extract_courses_final.py` | 培养方案 PDF → 课程号 + 课程名（破水印在这里） |
 | `parse_courses.py` | 同上，另一种实现（按坐标重建行） |
 | `scan_catalog.py` | zdbk 选课目录 → 候选课程池（通识必修/选修各页签，401 门去重） |
@@ -51,8 +51,7 @@
 
 培养方案覆盖**全部 131 个专业**，不是我一个专业的。我自己的专业（人工智能）只是其中之一；
 `kb.json` 由 `build_kb.py` 从 131 份培养方案 PDF 解析而来（PDF 体积大，没有放进仓库）。
-| `培养方案课程清单.tsv` | 56 行 | 从人工智能专业 PDF 抽出的课程，是 `kb.json` 之前的手工版 |
-| `培养方案_人工智能_2026.txt` | 2069 行 | PDF 原始文本（水印混杂，属中间素材） |
+| `plan_courses.tsv` | 56 行 | 早期手工整理的课程清单（`kb.json` 出来之前用的） |
 
 ### 筛出来多少
 
@@ -117,7 +116,7 @@ ws.sort(key=lambda w: (round(w["top"] / 4.0), w["x0"]))   # 按 top 分桶成行
 
 ```
 培养方案 PDF ──extract_pdf──▶ 原始文本
-             ──extract_courses_final──▶ 培养方案课程清单.tsv
+             ──extract_courses_final──▶ plan_courses.tsv
 131 份培养方案 PDF ──build_kb.py──▶ kb.json
                                               │
 zdbk 选课目录 ──scan_catalog──▶ 候选课程池 ────┤
