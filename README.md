@@ -6,6 +6,86 @@
 > 数据快照：**2026–2027 学年第 1 学期**（采集于第二轮选课截止前）。
 > 余量、容量、开课时间均为该时刻状态，**请以教务网为准**。
 
+---
+
+## ⚠️ 运行前提：本仓库依赖一个外部登录模块
+
+**直接 `python probe_scan.py` 会失败。** 本项目里 8 个脚本需要访问教务系统，而登录逻辑**不在本仓库内**——
+它们通过 `importlib` 从本机加载一个独立模块：
+
+```python
+# 每个联网脚本开头都是这段
+spec = importlib.util.spec_from_file_location(
+    "zju_jwglxt", "~/.codex/skills/zju-jwglxt/scripts/zju_jwglxt.py")
+```
+
+**为什么把登录拆出去**：它要处理浙大统一身份认证（CAS SSO）与 RSA 密码加密，
+和「选课数据整理」是两件不同的事；拆开后本仓库可以安全公开，
+**账号密码永远不进版本控制**。
+
+### 在你自己的机器上跑起来
+
+**第 1 步：准备登录模块**
+
+需要一个 `zju_jwglxt.py`，对外暴露：
+
+```python
+def get_credentials():                 # 返回 (username, password)
+class Jwglxt:
+    def __init__(self, username, password): ...
+    def login(self) -> bool: ...
+    def req(self, url, data=None, referer=None): ...
+    def course_context(self): ...       # 返回 (ctx, categories)
+```
+
+自带的凭据读取顺序（**不用改代码，把凭据放对位置即可**）：
+
+1. 环境变量 `ZJU_JWGLXT_USERNAME` / `ZJU_JWGLXT_PASSWORD`
+2. 文件 `~/.config/zju-jwglxt/credentials.json`，内容 `{"username": "...", "password": "..."}`
+
+**第 2 步：把脚本里的绝对路径改成你自己的**
+
+```bash
+grep -rn "zju-jwglxt" *.py     # 8 个脚本里都硬编码了模块路径
+```
+
+**第 3 步：装依赖**
+
+```bash
+pip install pdfplumber openpyxl
+```
+
+**第 4 步：配置凭据**（二选一）
+
+```bash
+# 方式 A：环境变量
+export ZJU_JWGLXT_USERNAME='你的学号'
+export ZJU_JWGLXT_PASSWORD='你的密码'
+
+# 方式 B：配置文件
+mkdir -p ~/.config/zju-jwglxt
+printf '{"username":"你的学号","password":"你的密码"}' > ~/.config/zju-jwglxt/credentials.json
+chmod 600 ~/.config/zju-jwglxt/credentials.json
+```
+
+> 🔒 `.gitignore` 已排除 `credentials*.json` 与 `.env*`，**密码不会进仓库**。
+
+**第 5 步：跑**
+
+```bash
+python scan_catalog.py           # 取课程目录
+python extract_courses_final.py  # 从培养方案 PDF 提取课程
+python friday_sweep.py           # 查教学班时间与余量
+python make_excel.py             # 生成 Excel
+```
+
+### 已知的可移植性问题
+
+- 脚本里的模块路径是**绝对路径**，换机器必须改（**这是本项目目前最该修的地方**）
+- `extract_*.py` 里培养方案 PDF 的路径同样是绝对路径
+- 只读取公开页面，**不做自动抢课、不传播数据**
+
+
 **线上演示**：https://zju-coursefit-pingpao.netlify.app
 （空闲时段表格 + 131 个专业的培养方案知识库 + 按空闲时段自动过滤）
 
@@ -131,15 +211,16 @@ zdbk 选课目录 ──scan_catalog──▶ 候选课程池 ────┤
 
 ## Limitations · 我知道它哪里脆弱
 
-1. **数据源是脆的**。教务网没有公开 API，接口结构一旦改版，抓取层就失效。
+1. **不可直接运行**（见文首警告）：依赖外部登录模块，且脚本内是绝对路径。**换机器 clone 下来跑不了。**
+2. **数据源是脆的**。教务网没有公开 API，接口结构一旦改版，抓取层就失效。
    因此「抓取」与「处理/展示」是分离的两层——**抓取失败不影响已生成的结果页**。
-2. **教师评价来自第三方平台**，不是官方数据，且会变化，仅作参考。
-3. **余量/容量是抓取那一刻的快照**，随时变动。
-4. **筛选条件是个人口径**（我的空闲窗口、我要修的课程类别），不是通用配置，别人拿去不一定适用。
-5. **依赖外部模块**：多数脚本通过 `importlib` 动态加载
+3. **教师评价来自第三方平台**，不是官方数据，且会变化，仅作参考。
+4. **余量/容量是抓取那一刻的快照**，随时变动。
+5. **筛选条件是个人口径**（我的空闲窗口、我要修的课程类别），不是通用配置，别人拿去不一定适用。
+6. **依赖外部模块**：多数脚本通过 `importlib` 动态加载
    `~/.codex/skills/zju-jwglxt/scripts/zju_jwglxt.py`（统一身份认证登录 zdbk）。
    **换台机器 clone 下来无法直接运行**，需要先具备该模块，或把登录逻辑内联进来。
-6. **尚未自动化**：换学期需要手动重跑流程，没有定时任务。
+7. **尚未自动化**：换学期需要手动重跑流程，没有定时任务。
 
 ## Learned · 学到的东西
 
@@ -147,6 +228,8 @@ zdbk 选课目录 ──scan_catalog──▶ 候选课程池 ────┤
 - **数据问题看起来像工具问题**：PDF「抽不出文本」的解法不是换工具，而是换思路（文本流 → 坐标）。
 - **主动标注口径**：产物的 `.md` 头部写清筛选条件与剔除规则，让结果可复现、可追溯。
 - **把重复步骤沉淀成可复用流程**：摸清接口后固化，换学期重跑不需要重新摸索。
+- **凭据与代码分离**：把登录模块拆出仓库，是本项目能公开的前提。
+- **可移植性要在设计时就考虑**：绝对路径让这份代码只能在一台机器上跑，是明显的返工点。
 
 ## 说明
 
