@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 """Enumerate zdbk 自主选课 catalogs for the plan-relevant categories
 (通识必修一级/二级 + 通识选修一级/二级 + 体育) into a candidate course set."""
-import importlib.util, json, sys, time, urllib.parse
+from config import load_jwglxt, tmp
+import json, sys, time, urllib.parse
 
-spec = importlib.util.spec_from_file_location(
-    "zju_jwglxt", "/Users/kaorouchuan/.codex/skills/zju-jwglxt/scripts/zju_jwglxt.py")
-mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(mod)
+mod = load_jwglxt()
 
 j = mod.Jwglxt(*mod.get_credentials())
 if not j.login():
@@ -96,7 +94,7 @@ for c in seen_code.values():
     c["labels"] = sorted(c["labels"])
 
 out = sorted(seen_code.values(), key=lambda c: c["code"])
-with open("/tmp/jwglxt_catalog.json", "w", encoding="utf-8") as f:
+with open(tmp("jwglxt_catalog.json"), "w", encoding="utf-8") as f:
     json.dump(out, f, ensure_ascii=False, indent=1)
 print("\n== 通识类候选课程(去重后):", len(out), "门 ==")
 for label, codes in by_label.items():

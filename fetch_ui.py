@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Fetch 自主选课 page HTML, list script assets, dump for inspection."""
-import importlib.util, re, sys, urllib.parse
+from config import load_jwglxt, tmp
+import re, sys, urllib.parse
 
-spec = importlib.util.spec_from_file_location(
-    "zju_jwglxt", "/Users/kaorouchuan/.codex/skills/zju-jwglxt/scripts/zju_jwglxt.py")
-mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(mod)
+mod = load_jwglxt()
 
 j = mod.Jwglxt(*mod.get_credentials())
 if not j.login():
@@ -14,7 +12,7 @@ if not j.login():
 
 url = "https://zdbk.zju.edu.cn/jwglxt/xsxk/zzxkghb_cxZzxkGhbIndex.html?gnmkdm=N253530"
 resp, body = j.req(url)
-open("/tmp/zzxk_index.html", "w", encoding="utf-8").write(body)
+open(tmp("zzxk_index.html"), "w", encoding="utf-8").write(body)
 print("index bytes:", len(body))
 scripts = re.findall(r'<script[^>]+src="([^"]+)"', body)
 for s in scripts:

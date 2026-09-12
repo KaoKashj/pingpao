@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Extract (课程号, 课程名称) rows from the 培养方案 course tables."""
+from config import pdf_path
 import re
 import pdfplumber
 
-PDF = "/Users/kaorouchuan/Desktop/浙江大学/浙江大学2026级培养方案PDF/计算机科学与技术学院/2026级人工智能专业培养方案.pdf"
+PDF = pdf_path()
 
 WATERMARK = set("ytisrevnUgnaijehZ浙江大学")
 

@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 """Reconstruct table rows from the 培养方案 PDF using word positions,
 filtering the 浙江大学 watermark chars, then extract course rows."""
+from config import pdf_path
 import re, json
 import pdfplumber
 
-PDF = "/Users/kaorouchuan/Desktop/浙江大学/浙江大学2026级培养方案PDF/计算机科学与技术学院/2026级人工智能专业培养方案.pdf"
+PDF = pdf_path()
 
 # single chars that form the diagonal watermark: letters + 浙 江 大 学
 WATERMARK = set("ytisrevnUgnaijehZ浙江大学")

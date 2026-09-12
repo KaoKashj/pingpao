@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 """Fetch teaching sections for every candidate course (catalog pool + plan PDF
 codes) and keep sections scheduled on Friday. Save results."""
-import importlib.util, json, sys, time, urllib.parse
+from config import load_jwglxt, path, tmp
+import json, sys, time, urllib.parse
 
-spec = importlib.util.spec_from_file_location(
-    "zju_jwglxt", "/Users/kaorouchuan/.codex/skills/zju-jwglxt/scripts/zju_jwglxt.py")
-mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(mod)
+mod = load_jwglxt()
 
 j = mod.Jwglxt(*mod.get_credentials())
 if not j.login():
@@ -16,7 +14,7 @@ ctx, _ = j.course_context()
 xn, xq = ctx["xn"], ctx["xq"]
 
 # 1) load catalog pool
-pool = json.load(open("/tmp/jwglxt_catalog.json", encoding="utf-8"))
+pool = json.load(open(tmp("jwglxt_catalog.json"), encoding="utf-8"))
 cand = {}   # code -> meta
 for c in pool:
     cand[c["code"]] = {
@@ -26,7 +24,7 @@ for c in pool:
         "src": "zdbk通识/体育目录",
     }
 # 2) plan pdf codes
-for ln in open("/Users/kaorouchuan/Documents/ChatGPT/选课/培养方案课程清单.tsv", encoding="utf-8"):
+for ln in open(path("培养方案课程清单.tsv"), encoding="utf-8"):
     ln = ln.rstrip("\n")
     if not ln or ln.startswith("#"):
         continue
@@ -82,11 +80,11 @@ el = time.time() - t0
 print("done in %.0fs  | no-section:%d  err:%d  with-friday-courses:%d" % (
     el, no_sec, empty, len(results)), flush=True)
 
-json.dump(results, open("/tmp/jwglxt_friday.json", "w", encoding="utf-8"),
+json.dump(results, open(tmp("jwglxt_friday.json"), "w", encoding="utf-8"),
           ensure_ascii=False, indent=1)
 
 # ---- TSV ----
-tsv = "/Users/kaorouchuan/Documents/ChatGPT/选课/周五开课_候选课程明细.tsv"
+tsv = path("周五开课_候选课程明细.tsv")
 with open(tsv, "w", encoding="utf-8") as f:
     f.write("课程号\t课程名称\t开课学院\t候选依据\t所在目录/方案类别\t教学班\t教师\t周五上课时间\t地点\t学期段\t考试时间\t容量(已选/容量)\t是否已选\n")
     for r in sorted(results, key=lambda x: x["code"]):

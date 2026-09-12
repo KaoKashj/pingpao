@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Convert the TSV results into .xlsx (multiple sheets) for Excel."""
+from config import PROJECT_DIR
 import csv
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 
-BASE = "/Users/kaorouchuan/Documents/ChatGPT/选课"
+BASE = PROJECT_DIR
 
 
 def read_tsv(path):

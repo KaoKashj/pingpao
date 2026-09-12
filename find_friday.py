@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 """For every course code in the 培养方案, fetch its teaching sections for
 2026-2027-1 from zdbk, keep the ones whose schedule includes 周五."""
-import importlib.util, json, re, urllib.parse
+from config import load_jwglxt, path, tmp
+import json, re, urllib.parse
 
-spec = importlib.util.spec_from_file_location(
-    "zju_jwglxt", "/Users/kaorouchuan/.codex/skills/zju-jwglxt/scripts/zju_jwglxt.py")
-mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(mod)
+mod = load_jwglxt()
 
-PLAN_TSV = "/Users/kaorouchuan/Documents/ChatGPT/选课/培养方案课程清单.tsv"
+PLAN_TSV = path("培养方案课程清单.tsv")
 
 j = mod.Jwglxt(*mod.get_credentials())
 if not j.login():
@@ -53,7 +51,7 @@ for p in plan:
                         "dl": dl, "n": len(arr), "sections": arr})
     print("%s %s -> %s" % (p["code"], p["name"], ("%d jxb" % len(arr)) if arr else "无教学班"), flush=True)
 
-with open("/tmp/jwglxt_offered_plan.json", "w", encoding="utf-8") as f:
+with open(tmp("jwglxt_offered_plan.json"), "w", encoding="utf-8") as f:
     json.dump(offered, f, ensure_ascii=False, indent=1)
 
 def has_fri(it):
@@ -64,7 +62,7 @@ fri_courses = [c for c in offered if any(has_fri(s) for s in c["sections"])]
 print("\n== 本学期开设的培养方案课程数:", len(offered))
 print("== 其中含周五教学班的课程数:", len(fri_courses))
 
-with open("/Users/kaorouchuan/Documents/ChatGPT/选课/周五课程明细.tsv", "w", encoding="utf-8") as f:
+with open(path("周五课程明细.tsv"), "w", encoding="utf-8") as f:
     f.write("课程号\t课程名称\t培养方案类别\t教学班\t教师\t上课时间\t地点\t学期段\t考试时间\t容量(已选/容量)\t是否已选\n")
     for c in offered:
         for s in c["sections"]:

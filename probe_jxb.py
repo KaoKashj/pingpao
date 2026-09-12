@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Test JxbList endpoint for sample course codes; print returned teaching-class fields."""
-import importlib.util, json, sys, urllib.parse
+from config import load_jwglxt
+import json, sys, urllib.parse
 
-spec = importlib.util.spec_from_file_location(
-    "zju_jwglxt", "/Users/kaorouchuan/.codex/skills/zju-jwglxt/scripts/zju_jwglxt.py")
-mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(mod)
+mod = load_jwglxt()
 
 j = mod.Jwglxt(*mod.get_credentials())
 if not j.login():

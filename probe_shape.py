@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Inspect shape of offerings returned for relevant categories (first page only)."""
-import importlib.util, json, sys
+from config import load_jwglxt
+import json, sys
 
-spec = importlib.util.spec_from_file_location(
-    "zju_jwglxt", "/Users/kaorouchuan/.codex/skills/zju-jwglxt/scripts/zju_jwglxt.py")
-mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(mod)
+mod = load_jwglxt()
 
 j = mod.Jwglxt(*mod.get_credentials())
 if not j.login():

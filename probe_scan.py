@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Scan zdbk 选课 categories, dump all offerings to /tmp, inspect fields."""
-import importlib.util, json, sys
+from config import load_jwglxt, tmp
+import json, sys
 
-spec = importlib.util.spec_from_file_location(
-    "zju_jwglxt", "/Users/kaorouchuan/.codex/skills/zju-jwglxt/scripts/zju_jwglxt.py")
-mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(mod)
+mod = load_jwglxt()
 
 j = mod.Jwglxt(*mod.get_credentials())
 if not j.login():
@@ -33,7 +31,7 @@ for dl, name in cats:
             break
     print("[%s] %s 门" % (name, got), flush=True)
 
-with open("/tmp/jwglxt_scan_all.json", "w", encoding="utf-8") as f:
+with open(tmp("jwglxt_scan_all.json"), "w", encoding="utf-8") as f:
     json.dump(out, f, ensure_ascii=False)
 
 print("\nunion of keys:", sorted(keys))
