@@ -35,8 +35,8 @@
 | `extract_courses_final.py` | 培养方案 PDF → 课程号 + 课程名（破水印在这里） |
 | `parse_courses.py` | 同上，另一种实现（按坐标重建行） |
 | `scan_catalog.py` | zdbk 选课目录 → 候选课程池（通识必修/选修各页签，401 门去重） |
-| `find_friday.py` | 培养方案课程清单 → 周五开课的教学班 |
-| `friday_sweep.py` | 候选池 ∪ 培养方案（并集）→ 完整筛选结果 |
+| `fetch_sections.py` | zdbk 目录 ∪ 131 专业培养方案 → 每门课的教学班（时间/余量/教师） |
+| `build_kb.py` | 131 份培养方案 PDF → `kb.json` 知识库 |
 | `make_excel.py` | 结果 TSV → 多工作表 Excel（含表头样式） |
 
 ### 仓库里存了哪些结果
@@ -47,15 +47,17 @@
 | `窗口时段课程结果.md` | 37 行 | 人读版，头部写明窗口定义与剔除规则 |
 | `窗口时段课程结果.xlsx` | 16 KB | 双工作表：明细 + 培养方案清单 |
 | `窗口时段课程结果.json` | 324 KB | 原始数据（100 门课），zdbk 原始拼音字段（`kcmc`/`kkxy`/`matches`），保留完整信息 |
-| `周五开课_候选课程明细.tsv` | 87 行 | 周五有课的教学班明细 |
-| `周五课程结果.md` / `.xlsx` | 179 行 | 周五方案的结果 |
-| `培养方案课程清单.tsv` | 56 行 | 从 PDF 抽出的课程（课程号 / 课程名 / 类别） |
+| `kb.json` | 612 KB | 131 个专业的培养方案课程库（9542 条带课号课程） |
+
+培养方案覆盖**全部 131 个专业**，不是我一个专业的。我自己的专业（人工智能）只是其中之一；
+`kb.json` 由 `build_kb.py` 从 131 份培养方案 PDF 解析而来（PDF 体积大，没有放进仓库）。
+| `培养方案课程清单.tsv` | 56 行 | 从人工智能专业 PDF 抽出的课程，是 `kb.json` 之前的手工版 |
 | `培养方案_人工智能_2026.txt` | 2069 行 | PDF 原始文本（水印混杂，属中间素材） |
 
 ### 筛出来多少
 
 - 本学期候选中，按个人窗口筛出 25 门可排课程（PDF 培养方案 16 门、通识选修 9 门）
-- 周五方案下筛出 34 门课程、86 个未选教学班
+- 培养方案知识库覆盖 131 个专业、9542 条带课号课程
 - 线上版本额外提供：131 个专业的培养方案知识库（从 132 份 PDF 解析，9542 条带课号课程）
 
 ---
@@ -116,10 +118,11 @@ ws.sort(key=lambda w: (round(w["top"] / 4.0), w["x0"]))   # 按 top 分桶成行
 ```
 培养方案 PDF ──extract_pdf──▶ 原始文本
              ──extract_courses_final──▶ 培养方案课程清单.tsv
+131 份培养方案 PDF ──build_kb.py──▶ kb.json
                                               │
 zdbk 选课目录 ──scan_catalog──▶ 候选课程池 ────┤
                                               ▼
-                                  find_friday / friday_sweep
+                                  fetch_sections.py
                                               │  逐课查教学班，取上课时间/余量/教师
                                               ▼
                                     结果 TSV ──make_excel──▶ Excel
@@ -283,7 +286,7 @@ chmod 600 ~/.config/zju-jwglxt/credentials.json
 ```bash
 python scan_catalog.py           # 取课程目录
 python extract_courses_final.py  # 从培养方案 PDF 提取课程
-python friday_sweep.py           # 查教学班时间与余量
+python fetch_sections.py         # 查教学班时间与余量
 python make_excel.py             # 生成 Excel
 ```
 
@@ -308,6 +311,6 @@ python make_excel.py             # 生成 Excel
 1. 确认教务账号会话有效（`zju-jwglxt` 模块）
 2. 重跑 `scan_catalog.py` 取最新课程目录；期间留意接口结构有无变化
 3. 重跑 `extract_courses_final.py` 从最新培养方案 PDF 提取课程清单
-4. 重跑 `friday_sweep.py` / `find_friday.py` 查教学班时间与余量
+4. 重跑 `fetch_sections.py` 查教学班时间与余量
 5. 更新第三方评价数据并合并
 6. `make_excel.py` 生成表格

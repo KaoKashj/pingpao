@@ -35,7 +35,7 @@ import tempfile
 
 __all__ = [
     "PROJECT_DIR", "TMP_DIR", "JWGLXT_MODULE", "PDF_PATH",
-    "PLAN_TSV", "CATALOG_JSON", "PDF_PATH_DEFAULT",
+    "PLAN_TSV", "CATALOG_JSON", "PDF_PATH_DEFAULT", "PLAN_PDF_DIR", "KB_JSON",
     "path", "tmp", "load_jwglxt", "require_pdf", "jwglxt_path",
 ]
 
@@ -64,6 +64,15 @@ PDF_PATH_DEFAULT = os.path.expanduser(
 
 #: 实际使用的 PDF 路径（COURSEFIT_PDF 优先）
 PDF_PATH = os.path.expanduser(os.environ.get("COURSEFIT_PDF", PDF_PATH_DEFAULT))
+
+#: 培养方案 PDF 总目录（131 个专业，用于 build_kb.py 建知识库）
+PLAN_PDF_DIR = os.path.abspath(os.path.expanduser(
+    os.environ.get("COURSEFIT_PLAN_DIR",
+                   "~/Desktop/浙江大学/浙江大学2026级培养方案PDF")))
+
+#: 知识库（131 个专业的带课号课程，由 build_kb.py 生成）
+KB_JSON = os.path.join(PROJECT_DIR, "kb.json")
+
 
 # ---- 本项目内部的产物路径 -------------------------------------------------
 

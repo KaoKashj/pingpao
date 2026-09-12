@@ -40,10 +40,10 @@ def fill_sheet(ws, rows, widths=None):
 
 wb = Workbook()
 
-# Sheet 1: 周五课程明细
-rows1 = read_tsv(f"{BASE}/周五开课_候选课程明细.tsv")
+# Sheet 1: 候选课程教学班明细
+rows1 = read_tsv(f"{BASE}/候选课程教学班明细.tsv")
 ws1 = wb.active
-ws1.title = "周五开课明细"
+ws1.title = "候选课程教学班"
 fill_sheet(ws1, rows1, widths=[13, 24, 16, 14, 26, 30, 18, 30, 22, 10, 26, 14, 8])
 
 # Sheet 2: PDF 培养方案课程清单
@@ -51,6 +51,6 @@ rows2 = read_tsv(f"{BASE}/培养方案课程清单.tsv")
 ws2 = wb.create_sheet("PDF培养方案55门")
 fill_sheet(ws2, rows2, widths=[14, 30, 24])
 
-out = f"{BASE}/周五课程结果.xlsx"
+out = f"{BASE}/候选课程教学班.xlsx"
 wb.save(out)
 print("saved", out)
